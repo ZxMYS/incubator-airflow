@@ -7,9 +7,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-# 
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -1290,6 +1290,13 @@ class SchedulerJob(BaseJob):
         # actually enqueue them
         for task_instance in task_instances:
             simple_dag = simple_dag_bag.get_dag(task_instance.dag_id)
+
+            if simple_dag.full_filepath.startswith(settings.DAGS_FOLDER):
+                path = simple_dag.full_filepath.replace(settings.DAGS_FOLDER,
+                                                        "DAGS_FOLDER", 1)
+            else:
+                path = simple_dag.full_filepath
+
             command = " ".join(TI.generate_command(
                 task_instance.dag_id,
                 task_instance.task_id,
@@ -1301,7 +1308,7 @@ class SchedulerJob(BaseJob):
                 ignore_task_deps=False,
                 ignore_ti_state=False,
                 pool=task_instance.pool,
-                file_path=simple_dag.full_filepath,
+                file_path=path,
                 pickle_id=simple_dag.pickle_id))
 
             priority = task_instance.priority_weight
